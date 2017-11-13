@@ -1,5 +1,5 @@
 {
-    "name": "aymanrb/php-unstructured-text-parser",
+    "name": "akademiano/php-unstructured-text-parser",
     "description": "A PHP Class to help extract text out of documents that are not structured in a processing friendly manner",
     "keywords": [
         "text parser", "extract data", "php parser", "templates parsing", "regex parsing", "form parsing", "text parse"
@@ -18,29 +18,16 @@
             "name": "Pavel",
             "homepage": "http://www.aisamiery.ru",
             "role": "Developer"
+        },
+        {
+            "name": "Vasiliy Shvakin",
+            "email": "mrdatamapper@gmail.com"
         }
-
     ],
-    "homepage": "https://github.com/aymanrb/php-unstructured-text-parser",
-    "support": {
-        "issues": "https://github.com/aymanrb/php-unstructured-text-parser/issues",
-        "source": "https://github.com/aymanrb/php-unstructured-text-parser"
-    },
+    "homepage": "https://github.com/mrdatamapper/php-unstructured-text-parser",
     "autoload": {
         "psr-4": {
-            "aymanrb\\UnstructuredTextParser\\": "src/"
+            "Akademiano\\UnstructuredTextParser\\": "src/"
         }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "aymanrb\\UnstructuredTextParser\\Tests\\": "tests/"
-        }
-    },
-    "require": {
-        "php": ">=5.6.0",
-        "monolog/monolog": "^1.23"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^5.0"
     }
 }
