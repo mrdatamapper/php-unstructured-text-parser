@@ -6,12 +6,12 @@ use DirectoryIterator;
 
 class TextParser
 {
-    public function parseText(string $text, string $templateContent)
+    public function parseText(string $text, string $templateContent, $templateByStrings = true)
     {
-        $text = $this->prepareText($text);
+        $text = $this->prepareText($text, $templateByStrings);
 
-        $templatePattern = $this->prepareTemplate($templateContent);
-        $extractedData = $this->extractData($text, $templatePattern);
+        $templatePattern = $this->prepareTemplate($templateContent, $templateByStrings);
+        $extractedData = $this->extractData($text, $templatePattern, $templateByStrings);
 
         if ($extractedData) {
             return $extractedData;
@@ -22,7 +22,7 @@ class TextParser
     public function parseByTemplate(string $text, string $templatePath)
     {
         $templateContent = file_get_contents($templatePath);
-        return $this->parseByTemplate($text, $templateContent);
+        return $this->parseText($text, $templateContent);
     }
 
     public function parseByTemplatesDir(string $text, string $templatesDir, $findMatchingTemplate = true)
@@ -40,7 +40,7 @@ class TextParser
 
     public function getDirectoryIterator($directory)
     {
-        return  new DirectoryIterator($directory);
+        return new DirectoryIterator($directory);
 
     }
 
@@ -67,10 +67,12 @@ class TextParser
      * @return string; The prepared clean text
      *
      */
-    protected function prepareText($txt)
+    protected function prepareText($txt, $templateByStrings = false)
     {
-        //Remove all multiple whitespaces and replace it with single space
-        $txt = preg_replace('/\s+/', ' ', $txt);
+        if (!$templateByStrings) {
+            //Remove all multiple whitespaces and replace it with single space
+            $txt = preg_replace('/\s+/', ' ', $txt);
+        }
 
         return trim($txt);
     }
@@ -82,17 +84,20 @@ class TextParser
      * @return string; The prepared clean template pattern
      *
      */
-    protected function prepareTemplate($templateTxt)
+    protected function prepareTemplate($templateTxt, $templateByStrings)
     {
         $patterns = [
             '/\\\{%(.*)%\\\}/U', // 1 Replace all {%Var%}...
-            '/\s+/',             // 2 Replace all white-spaces...
         ];
 
         $replacements = [
             '(?<$1>.*)',         // 1 ...with (?<Var>.*)
-            ' ',                 // 2 ...with a single space
         ];
+
+        if (!$templateByStrings) {
+            $patterns[] = '/\s+/';
+            $replacements[] = ' ';
+        }
 
         $templateTxt = preg_replace($patterns, $replacements, preg_quote($templateTxt, '/'));
 
@@ -107,10 +112,23 @@ class TextParser
      * @return array|bool; The matched data array or false on unmatched text
      *
      */
-    protected function extractData($text, $template)
+    protected function extractData($text, $template, $templateByStrings = true)
     {
-        //Extract the text based on the provided template using REGEX
-        preg_match('/' . $template . '/s', $text, $matches);
+        $modifers = '';
+        if (!$templateByStrings) {
+            //Extract the text based on the provided template using REGEX
+            $templates = [$template];
+            $modifers = '/s';
+        } else {
+            $templates = preg_split("/\r\n|\n|\r/", $template, -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+        $fullMatches = [];
+        foreach ($templates as $template) {
+            preg_match('/' . $template . '/' . $modifers, $text, $matches);
+            $fullMatches = array_merge($fullMatches, $matches);
+        }
+        $matches = $fullMatches;
 
         //Extract only the named parameters from the matched regex array
         $keys = array_filter(array_keys($matches), 'is_string');
